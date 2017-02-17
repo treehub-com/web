@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script>
+      function bootstrap() {
+        fetch('TH.json')
+          .then(res => res.json())
+          .then(data => {
+            window.TH = data;
+            console.log(data);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
+
+      // window._fetch = fetch;
+      // window.fetch = (urlString, options = {}) => {
+      //   const url = new URL(urlString);
+      //   if (url.origin == location.origin) {
+      //
+      //   }
+      //   return window._fetch(urlString, options);
+      // }
+
+      // We use setTimeout so fetch gets intercepted by sw
+      navigator.serviceWorker.ready.then((e) => setTimeout(bootstrap, 0));
+      navigator.serviceWorker.register('/sw.js');
+    </script>
+  </head>
+  <body>
+    Loading...
+  </body>
+</html>
