@@ -1,6 +1,6 @@
 self.importScripts('store.js');
 
-const files = ['/', '/index.html', '/sw.js', '/server.js', '/store.js'];
+const files = ['/', '/index.html', '/sw.js', '/server.js', '/store.js', '/jszip.js'];
 
 
 self.addEventListener('install', (e) => {
@@ -9,11 +9,11 @@ self.addEventListener('install', (e) => {
   }));
 });
 
-self.addEventListener('activate', e => {
+self.addEventListener('activate', (e) => {
   return self.clients.claim();
 });
 
-self.addEventListener('fetch', function(e) {
+self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
   // If the url is local

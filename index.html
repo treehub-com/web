@@ -8,12 +8,29 @@
       }
     </style>
     <script>
+      window._loaded = false;
+      window._requiredPackages = ['app'];
       function bootstrap() {
+        if (!window._loaded) {
+          return window._loaded = true;
+        }
         fetch('TH.json')
           .then(res => res.json())
           .then(data => {
             window.TH = data;
-            console.log(data);
+            const promises = [];
+            for (const pkg of window._requiredPackages) {
+              if (window.TH[pkg] === undefined) {
+                promises.push(fetch('/_/package/install', {
+                  method: 'POST',
+                  body: JSON.stringify({name: pkg}),
+                }));
+              }
+            }
+            return Promise.all(promises);
+          })
+          .then(() => {
+            document.body.innerHTML = 'App';
           })
           .catch((error) => {
             console.error(error);
@@ -26,7 +43,6 @@
         const url = new URL(urlString, window.location.origin);
         // Intercept POST requests to this domain and route them to our server
         if (url.origin == window.location.origin && options.method === 'POST') {
-          console.log('Intercepting POST');
           // Call server
           const arr = [];
           window.crypto.getRandomValues(new window.Uint8ClampedArray(16))
@@ -37,11 +53,8 @@
           })
           window.server.postMessage(JSON.stringify({
             id: uuid,
-            cmd: 'REQUEST',
-            data: {
-              url: url.pathname,
-              body: options.body
-            }
+            url: url.pathname,
+            body: options.body,
           }));
           return promise;
         }
@@ -51,10 +64,13 @@
       window.server = new Worker('server.js');
       window.server.onmessage = (e) => {
         const message = JSON.parse(e.data);
+        if (message.id === 'STARTED') {
+          return setTimeout(bootstrap, 0);
+        }
         if (window._fetchPromises[message.id] === undefined) {
           return console.error(`Missing promise for request ${message.id}`);
         }
-        const response = new Response(message.data.body, {status: message.data.status});
+        const response = new Response(message.body, {status: message.status});
         window._fetchPromises[message.id].call(response, response);
         delete window._fetchPromises[message.id];
       };
