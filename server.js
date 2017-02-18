@@ -27,9 +27,9 @@ self.onmessage = function(e) {
   }
 
   routes[pkg]({
-    route: `/${path.join('/')}`,
-    body: (request.body) ? JSON.parse(request.body) : {},
-  })
+      route: `/${path.join('/')}`,
+      body: (request.body) ? JSON.parse(request.body) : {},
+    })
     .then((body) => {
       self.postMessage(JSON.stringify({
         id: request.id,
@@ -38,6 +38,7 @@ self.onmessage = function(e) {
       }));
     })
     .catch((error) => {
+      console.log(error);
       self.postMessage(JSON.stringify({
         id: request.id,
         status: error.status || 500,
@@ -62,7 +63,37 @@ async function coreRoute({route, body}) {
 }
 
 async function installPackage({name, version = 'latest'}) {
-  console.log(`installing package ${name}:${version}`);
+  // Get the package
+  const response = await fetch(`https://packages.treehub.com/${name}/${version}.zip`);
+  if (response.status !== 200) {
+    const error = new Error('Package Not Found');
+    error.status = 500;
+    throw error;
+  }
+  const body = await response.arrayBuffer();
+
+  // Load the zip file
+  const contents = await JSZip.loadAsync(body);
+
+  // Get treehub.json
+  const json = await contents.file('treehub.json').async('string');
+  const pkg = JSON.parse(json);
+  if (name !== pkg.name) {
+    const error = new Error(`name mismatch: ${name} vs ${pkg.name}`);
+    error.status = 500;
+    throw error;
+  }
+
+  // Save package files
+  const promises = [];
+  contents.forEach((fileName, file) => {
+    promises.push(writePackageFile(name, fileName, file));
+  });
+  await Promise.all(promises);
+
+  // Add package version
+  await store.addPackage(name, pkg.version);
+
   return true;
 };
 
@@ -70,3 +101,8 @@ async function uninstallPackage({name}) {
   console.log(`uninstalling package ${name}`);
   return true;
 };
+
+async function writePackageFile(pkg, fileName, file) {
+  const contents = await file.async("string");
+  await store.addFile(`/${pkg}/${fileName}`, contents);
+}

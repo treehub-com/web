@@ -41,7 +41,7 @@ self.addEventListener('fetch', (e) => {
           if (file === undefined) {
             return new Response('', {status: 404});
           }
-          return new Response(JSON.stringify(file));
+          return new Response(file);
         })
       );
   }

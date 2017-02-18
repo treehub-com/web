@@ -15,8 +15,8 @@
           return window._loaded = true;
         }
         fetch('TH.json')
-          .then(res => res.json())
-          .then(data => {
+          .then((res) => res.json())
+          .then((data) => {
             window.TH = data;
             const promises = [];
             for (const pkg of window._requiredPackages) {
@@ -29,8 +29,20 @@
             }
             return Promise.all(promises);
           })
-          .then(() => {
-            document.body.innerHTML = 'App';
+          .then(() => fetch('TH.json'))
+          .then((res) => res.json())
+          .then((data) => {
+            window.TH = data;
+            for (const pkg of Object.keys(TH)) {
+              if (Array.isArray(TH[pkg].components)) {
+                for (const component of TH[pkg].components) {
+                  const script = document.createElement('script');
+                  script.src = `/${pkg}/${component}`;
+                  document.head.appendChild(script);
+                }
+              }
+            }
+            document.body.innerHTML = '<th-app></th-app>';
           })
           .catch((error) => {
             console.error(error);

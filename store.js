@@ -397,9 +397,7 @@ self.store = {
         return Promise.all(promises);
       })
       .then(jsons => {
-        const TH = {
-          working: 'yup',
-        };
+        const TH = {};
         for (const json of jsons) {
           const pkg = JSON.parse(json);
           TH[pkg.name] = pkg;
