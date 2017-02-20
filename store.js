@@ -387,7 +387,7 @@ self.store = {
       return tx.complete.then(() => keys);
     });
   },
-  getTH: () => {
+  getPackages: () => {
     return self.store.listPackages()
       .then(packages => {
         const promises = [];
@@ -397,12 +397,12 @@ self.store = {
         return Promise.all(promises);
       })
       .then(jsons => {
-        const TH = {};
+        const packages = {};
         for (const json of jsons) {
           const pkg = JSON.parse(json);
-          TH[pkg.name] = pkg;
+          packages[pkg.name] = pkg;
         }
-        return TH;
+        return packages;
       })
   }
 };

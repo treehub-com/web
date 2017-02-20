@@ -27,11 +27,11 @@ self.addEventListener('fetch', (e) => {
         caches.match(url.pathname)
       );
     }
-    // If they are asking for TH.json
-    if (url.pathname === '/TH.json') {
+    // If they are asking for packages.json
+    if (url.pathname === '/packages.json') {
       return e.respondWith(
-        self.store.getTH()
-          .then(TH => new Response(JSON.stringify(TH)))
+        self.store.getPackages()
+          .then(packages => new Response(JSON.stringify(packages)))
         );
     }
     // If they are asking for any other file, try indexeddb
