@@ -29,10 +29,11 @@
             }
             return Promise.all(promises);
           })
-          .then(() => fetch('/packages.json'))
-          .then((res) => res.json())
-          .then((data) => {
-            window.packages = data;
+          .then((installed) => {
+            // If we installed some packages on initial boot, restart
+            if (installed.length > 0) {
+              return window.location.reload();
+            }
             for (const pkg of Object.keys(window.packages)) {
               if (Array.isArray(window.packages[pkg].components)) {
                 for (const component of window.packages[pkg].components) {

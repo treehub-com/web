@@ -47,7 +47,41 @@ self.onmessage = function(e) {
     })
 }
 
-self.postMessage(JSON.stringify({id: 'STARTED'}));
+self.store.getPackages()
+  .then(packages => {
+    const promises = [];
+    for (const pkg of Object.keys(packages)) {
+      if (packages[pkg].route !== undefined) {
+        promises.push(loadRoute(pkg, packages[pkg].route));
+      }
+    }
+    return Promise.all(promises);
+  })
+  .then(() => {
+    self.postMessage(JSON.stringify({id: 'STARTED'}));
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+
+async function loadRoute(pkg, file) {
+  // Normalize filepath to remove ./
+  // TODO
+  const code = await self.store.getFile(`/${pkg}/${file}`);
+  const exported = {};
+  try {
+    eval(`((module) => {${code}})(exported)`);
+  } catch (error) {
+    console.error(`Error loading route for ${pkg}`);
+    console.error(error);
+    return;
+  }
+  if (typeof exported.exports !== 'function') {
+    console.error(`Could not load route for ${pkg}`);
+    return;
+  }
+  routes[pkg] = exported.exports;
+}
 
 async function coreRoute({route, body}) {
   switch(route) {
