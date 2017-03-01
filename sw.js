@@ -1,25 +1,41 @@
 self.importScripts('store.js');
 
+const cacheName = '__cache__';
 const files = ['/', '/index.html', '/sw.js', '/server.js', '/store.js', '/jszip.js'];
 
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open('v1').then((cache) => cache.addAll(files)).then(() => {
-    return self.skipWaiting();
-  }));
+  self.skipWaiting();
+  e.waitUntil(
+    caches.open(cacheName)
+      .then((cache) => cache.addAll(files))
+  );
 });
 
 self.addEventListener('activate', (e) => {
-  return self.clients.claim();
+  self.clients.claim();
+  e.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(
+        keys.map(key => {
+          if (key !== cacheName) {
+            return caches.delete(key);
+          }
+        })
+      ))
+  );
 });
 
 self.addEventListener('fetch', (e) => {
-  const url = new URL(e.request.url);
+  const url = new URL(e.request.url, self.location);
+
 
   // If the url is local
-  if (url.origin == location.origin) {
+  if (url.origin == self.location.origin) {
     // If anything other than GET, 404
-    // TODO
+    if (e.request.method !== 'GET') {
+      return new Response('', {status: 404});
+    }
 
     // If the url is on our list, return if from the cache
     if (files.includes(url.pathname)) {
