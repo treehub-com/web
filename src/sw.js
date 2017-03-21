@@ -1,7 +1,7 @@
 self.importScripts('store.js');
 
 const cacheName = '__cache__';
-const files = ['/', '/index.html', '/sw.js', '/server.js', '/store.js', '/jszip.js', '/logo.png'];
+const files = ['/', '/index.html', '/sw.js', '/server.js', '/store.js', '/jszip.js', '/level.js', '/logo.png'];
 
 
 self.addEventListener('install', (e) => {

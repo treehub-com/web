@@ -1,5 +1,6 @@
 self.importScripts('store.js');
 self.importScripts('jszip.js');
+self.importScripts('level.js');
 
 const routes = {
   _: coreRoute,
@@ -80,7 +81,10 @@ async function loadRoute(pkg, file) {
     console.error(`Could not load route for ${pkg}`);
     return;
   }
-  routes[pkg] = await exported.exports({});
+  routes[pkg] = await exported.exports({
+    LevelUpBackend: LevelJS,
+    pathPrefix: pkg + '/',
+  });
 }
 
 async function coreRoute({route, body}) {
