@@ -80,7 +80,7 @@ async function loadRoute(pkg, file) {
     console.error(`Could not load route for ${pkg}`);
     return;
   }
-  routes[pkg] = exported.exports;
+  routes[pkg] = await exported.exports({});
 }
 
 async function coreRoute({route, body}) {
