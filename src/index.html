@@ -79,7 +79,7 @@
         return window._fetch(urlString, options);
       }
 
-      window.server = new Worker('server.js');
+      window.server = new Worker('/server.js');
       window.server.onmessage = (e) => {
         const message = JSON.parse(e.data);
         if (message.id === 'STARTED') {
