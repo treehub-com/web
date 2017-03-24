@@ -50,16 +50,24 @@ self.addEventListener('fetch', (e) => {
           .then(packages => new Response(JSON.stringify(packages)))
         );
     }
-    // If they are asking for any other file, try indexeddb
+
+    // If they ask for a file with an extension, try indexeddb
+    if (/\.[A-Za-z]+$/.test(url.pathname)) {
+      return e.respondWith(
+        self.store.getFile(url.pathname)
+          .then(file => {
+            if (file === undefined) {
+              return new Response('', {status: 404});
+            }
+            return new Response(file);
+          })
+        );
+    }
+
+    // If they are asking for any other file, return the index page
     return e.respondWith(
-      self.store.getFile(url.pathname)
-        .then(file => {
-          if (file === undefined) {
-            return new Response('', {status: 404});
-          }
-          return new Response(file);
-        })
-      );
+      caches.match('/index.html')
+    );
   }
 
   // Else let it go through
