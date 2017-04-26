@@ -39,16 +39,24 @@
             if (installed.length > 0) {
               return window.location.reload();
             }
+            let loading = 0;
             for (const pkg of Object.keys(window.packages)) {
               if (Array.isArray(window.packages[pkg].components)) {
                 for (const component of window.packages[pkg].components) {
+                  loading++;
                   const script = document.createElement('script');
                   script.src = `/${pkg}/${component}`;
+                  // Don't inject app-app until all components are loaded
+                  script.addEventListener('load', () => {
+                    loading--;
+                    if (loading === 0) {
+                      document.body.innerHTML = '<app-app></app-app>';
+                    }
+                  });
                   document.head.appendChild(script);
                 }
               }
             }
-            document.body.innerHTML = '<app-app></app-app>';
           })
           .catch((error) => {
             console.error(error);
