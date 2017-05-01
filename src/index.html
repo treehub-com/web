@@ -19,13 +19,14 @@
         if (!window._loaded) {
           return window._loaded = true;
         }
-        fetch('/packages.json')
+        fetch('/_/packages.json')
           .then((res) => res.json())
           .then((data) => {
-            window.packages = data;
+            window._ = {};
+            window._.packages = data;
             const promises = [];
             for (const pkg of window._requiredPackages) {
-              if (window.packages[pkg] === undefined) {
+              if (window._.packages[pkg] === undefined) {
                 promises.push(fetch('/_/package/install', {
                   method: 'POST',
                   body: JSON.stringify({name: pkg}),
@@ -40,9 +41,9 @@
               return window.location.reload();
             }
             let loading = 0;
-            for (const pkg of Object.keys(window.packages)) {
-              if (Array.isArray(window.packages[pkg].components)) {
-                for (const component of window.packages[pkg].components) {
+            for (const pkg of Object.keys(window._.packages)) {
+              if (Array.isArray(window._.packages[pkg].components)) {
+                for (const component of window._.packages[pkg].components) {
                   loading++;
                   const script = document.createElement('script');
                   script.src = `/${pkg}/${component}`;
