@@ -44,7 +44,7 @@ self.addEventListener('fetch', (e) => {
       );
     }
     // If they are asking for packages.json
-    if (url.pathname === '/packages.json') {
+    if (url.pathname === '/_/packages.json') {
       return e.respondWith(
         self.store.getPackages()
           .then(packages => new Response(JSON.stringify(packages)))
