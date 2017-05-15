@@ -71,7 +71,7 @@ async function loadRoute(pkg, file) {
   const code = await self.store.getFile(`/${pkg}/${file}`);
   const exported = {};
   try {
-    eval(`((module, window) => {${code}})(exported, self)`);
+    eval(`((module) => {${code}})(exported)`);
   } catch (error) {
     console.error(`Error loading route for ${pkg}`);
     console.error(error);
